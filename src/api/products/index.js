@@ -82,6 +82,7 @@ productsRouter.get("/", async (req, res, next) => {
 productsRouter.get("/pagination", async (req, res, next) => {
   try {
     // Get the page number and number of items per page from the query parameters
+    // <default page=1, limit=4>
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 4;
 
@@ -96,10 +97,7 @@ productsRouter.get("/pagination", async (req, res, next) => {
       // order: [['createdAt', 'DESC']],
     });
 
-    // Send the paginated results back to the client
-    // res.send(products);
-
-    // Get the total number of users
+    // Get the total number of products
     const totalProducts = await ProductsModel.count();
     console.log("totalProducts", totalProducts);
 
@@ -117,9 +115,12 @@ productsRouter.get("/pagination", async (req, res, next) => {
     };
 
     // Add a link to the next page if it exists
-    if (page < pages) {
+    if (page < pages && page === 1) {
       response.pagination.next = `/products/pagination?page=${page + 1}&limit=${limit}`;
-    } else {
+    } else if (page < pages && page > 1) {
+      response.pagination.next = `/products/pagination?page=${page + 1}&limit=${limit}`;
+      response.pagination.previous = `/products/pagination?page=${page - 1}&limit=${limit}`;
+    } else if (page === pages) {
       response.pagination.previous = `/products/pagination?page=${page - 1}&limit=${limit}`;
     }
 
