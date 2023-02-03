@@ -23,12 +23,6 @@ export const productsRouter = express.Router();
 // POST - with the ProductsCategoriesModel
 productsRouter.post("/", async (req, res, next) => {
   try {
-    // const product = await ProductsModel.create(req.body);
-    // console.log("product", product);
-    // console.log("req.body", req.body);
-    // const id = product.id;
-    // console.log("product id:", id);
-
     const { productId } = await ProductsModel.create(req.body);
     console.log("productId", productId);
     if (req.body.categories) {
@@ -80,6 +74,59 @@ productsRouter.get("/", async (req, res, next) => {
       res.send(products);
     }
   } catch (error) {
+    next(error);
+  }
+});
+
+// GET - with pagination
+productsRouter.get("/pagination", async (req, res, next) => {
+  try {
+    // Get the page number and number of items per page from the query parameters
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 4;
+
+    // Calculate the skip and offset values
+    const skip = (page - 1) * limit;
+    const offset = limit;
+
+    // Use Sequelize to find the users and paginate the results
+    const products = await ProductsModel.findAll({
+      offset,
+      limit,
+      // order: [['createdAt', 'DESC']],
+    });
+
+    // Send the paginated results back to the client
+    // res.send(products);
+
+    // Get the total number of users
+    const totalProducts = await ProductsModel.count();
+    console.log("totalProducts", totalProducts);
+
+    // Calculate the number of pages
+    const pages = Math.ceil(totalProducts / limit);
+
+    // Build the response object
+    const response = {
+      pagination: {
+        currentPage: page,
+        totalPages: pages,
+        perPage: limit,
+      },
+      products,
+    };
+
+    // Add a link to the next page if it exists
+    if (page < pages) {
+      response.pagination.next = `/products/pagination?page=${page + 1}&limit=${limit}`;
+    } else {
+      response.pagination.previous = `/products/pagination?page=${page - 1}&limit=${limit}`;
+    }
+
+    // Send the response back to the client
+    res.send(response);
+  } catch (error) {
+    console.log("GET - with pagination endpoint - ERROR: ", error);
     next(error);
   }
 });

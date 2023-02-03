@@ -5,7 +5,7 @@ import CategoriesModel from "./model.js";
 import ProductsModel from "../products/model.js";
 import ProductsCategoriesModel from "../JUNCTION/productsCategoriesModel.js";
 
-const { NotFound } = createHttpError;
+const { NotFound, BadRequest } = createHttpError;
 
 export const categoriesRouter = express.Router();
 
@@ -32,13 +32,18 @@ categoriesRouter.post("/:id/addCategory", async (req, res, next) => {
 // POST - BULK
 categoriesRouter.post("/bulk", async (req, res, next) => {
   try {
-    const categories = await CategoriesModel.bulkCreate([
-      { name: "Node.js" },
-      { name: "Backend" },
-      { name: "Databases" },
-      { name: "React.js" },
-    ]);
-    res.send(categories.map((c) => c.categoryId));
+    // const categoriesArray = await CategoriesModel.bulkCreate([
+    //   { name: "Node.js" },
+    //   { name: "Backend" },
+    //   { name: "Databases" },
+    //   { name: "React.js" },
+    // ]);
+    if (req.body.categories) {
+      const categoriesArray = await CategoriesModel.bulkCreate(req.body.categories);
+      res.send(categoriesArray.map((cat) => cat));
+    } else {
+      next(BadRequest(`You need tho input a list of categries`));
+    }
   } catch (error) {
     next(error);
   }
