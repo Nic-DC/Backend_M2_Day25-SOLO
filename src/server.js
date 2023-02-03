@@ -14,6 +14,7 @@ import {
 } from "./errorHandlers.js";
 
 import { pgConnect, syncModels } from "./db.js";
+import { cartRouter } from "./api/cart/index.js";
 
 const server = express();
 const PORT = process.env.PORT || 3014;
@@ -28,6 +29,7 @@ server.use("/products", productsRouter);
 server.use("/products", reviewsRouter);
 server.use("/products", categoriesRouter);
 server.use("/users", usersRouter);
+server.use("/cart", cartRouter);
 
 // ******************************* ERROR HANDLERS **************************************
 server.use(badRequestErrorHandler);
