@@ -23,11 +23,11 @@ server.use(cors());
 server.use(express.json());
 
 // ********************************** ENDPOINTS ****************************************
-server.use("/users", usersRouter);
 
 server.use("/products", productsRouter);
 server.use("/products", reviewsRouter);
 server.use("/products", categoriesRouter);
+server.use("/users", usersRouter);
 
 // ******************************* ERROR HANDLERS **************************************
 server.use(badRequestErrorHandler);

@@ -23,17 +23,17 @@ export const productsRouter = express.Router();
 // POST - with the ProductsCategoriesModel
 productsRouter.post("/", async (req, res, next) => {
   try {
-    const { productId } = await ProductsModel.create(req.body);
-    console.log("productId", productId);
+    const { id } = await ProductsModel.create(req.body);
+    console.log("productId", id);
     if (req.body.categories) {
       await ProductsCategoriesModel.bulkCreate(
         req.body.categories.map((category) => {
-          return { categoryId: category, productId: productId };
+          return { categoryId: category, productId: id };
         })
       );
     }
     console.log("req.categories", req.body.categories);
-    res.status(201).send({ productId: productId });
+    res.status(201).send({ productId: id });
   } catch (error) {
     next(error);
   }

@@ -1,10 +1,9 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../db.js";
 import ReviewsModel from "../reviews/model.js";
-import UsersReviewsModel from "../JUNCTION/usersProductsModel.js";
 
 const UsersModel = sequelize.define("user", {
-  userId: {
+  id: {
     type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
@@ -34,5 +33,6 @@ const UsersModel = sequelize.define("user", {
 
 // 1-to-many
 UsersModel.hasMany(ReviewsModel, { foreignKey: { allowNull: false } });
-ReviewsModel.belongsTo(UsersModel);
+ReviewsModel.belongsTo(UsersModel, { foreignKey: { allowNull: false } });
+
 export default UsersModel;

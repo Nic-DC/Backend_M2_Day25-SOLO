@@ -3,7 +3,7 @@ import sequelize from "../../db.js";
 import ReviewsModel from "../reviews/model.js";
 
 const ProductsModel = sequelize.define("product", {
-  productId: {
+  id: {
     type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
@@ -33,6 +33,6 @@ const ProductsModel = sequelize.define("product", {
 
 /* ------------------ 1-to-many: PRODUCT & REVIEWS -------------------- */
 ProductsModel.hasMany(ReviewsModel, { foreignKey: { allowNull: false } });
-ReviewsModel.belongsTo(ProductsModel);
+ReviewsModel.belongsTo(ProductsModel, { foreignKey: { allowNull: false } });
 
 export default ProductsModel;

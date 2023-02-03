@@ -3,7 +3,7 @@ import sequelize from "../../db.js";
 import UsersModel from "../users/model.js";
 import ProductsModel from "../products/model.js";
 
-const usersProductsModel = sequelize.define("userProduct", {
+const UsersProductsModel = sequelize.define("userProduct", {
   userProductID: {
     type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
@@ -13,12 +13,12 @@ const usersProductsModel = sequelize.define("userProduct", {
 
 // many-to-many
 UsersModel.belongsToMany(ProductsModel, {
-  through: usersProductsModel,
+  through: UsersProductsModel,
   foreignKey: { name: "userId", allowNull: false },
 });
 ProductsModel.belongsToMany(UsersModel, {
-  through: usersProductsModel,
-  foreignKey: { name: "reviewId", allowNull: false },
+  through: UsersProductsModel,
+  foreignKey: { name: "productId", allowNull: false },
 });
 
-export default usersProductsModel;
+export default UsersProductsModel;

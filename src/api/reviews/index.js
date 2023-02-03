@@ -12,9 +12,11 @@ reviewsRouter.post("/:id/reviews", async (req, res, next) => {
   try {
     const { id } = req.params;
     const product = await ProductsModel.findByPk(id);
+
+    const body = { ...req.body, productId: id };
     console.log("product with reviews", product);
     if (product) {
-      const review = await ReviewsModel.create(req.body);
+      const review = await ReviewsModel.create(body);
       res.status(201).send(review);
     } else {
       next(NotFound(`The product with id: ${id} not in the db`));
