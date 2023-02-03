@@ -2,16 +2,28 @@ import express from "express";
 import createHttpError from "http-errors";
 import { Op } from "sequelize";
 import CategoriesModel from "./model.js";
+import ProductsModel from "../products/model.js";
+import ProductsCategoriesModel from "../JUNCTION/productsCategoriesModel.js";
 
 const { NotFound } = createHttpError;
 
 export const categoriesRouter = express.Router();
 
 // POST
-categoriesRouter.post("/", async (req, res, next) => {
+categoriesRouter.post("/:id/addCategory", async (req, res, next) => {
   try {
-    const category = await CategoriesModel.create(req.body);
-    res.status(201).send(category);
+    const { id } = req.params;
+    const product = await ProductsModel.findByPk(id);
+    console.log("product with categories", product);
+    if (product) {
+      const category = await CategoriesModel.create(req.body);
+      const categoryId = category.categoryId;
+      const productCategory = await ProductsCategoriesModel.create({ categoryId: categoryId, productId: id });
+      console.log("productCategory", productCategory);
+      res.status(201).send(category);
+    } else {
+      next(NotFound(`The product with id: ${id} not in the db`));
+    }
   } catch (error) {
     next(error);
   }
@@ -85,16 +97,30 @@ categoriesRouter.put("/:categoryId", async (req, res, next) => {
   }
 });
 
-categoriesRouter.delete("/:categoryId", async (req, res, next) => {
+categoriesRouter.delete("/:id/removeCategory/:categoryId", async (req, res, next) => {
   try {
-    const numberOfDeletedRows = await CategoriesModel.destroy({
-      where: { id: req.params.categoryId },
-    });
-    console.log("numberOfDeletedRows", numberOfDeletedRows);
-    if (numberOfDeletedRows === 1) {
-      res.send(`The category with id: ${req.params.categoryId} successfully deleted`);
+    const { id } = req.params;
+    const product = await ProductsModel.findByPk(id);
+    console.log("product with categories", product);
+    if (product) {
+      const numberOfDeletedRows = await CategoriesModel.destroy({
+        where: { categoryId: req.params.categoryId },
+      });
+
+      // the below code is redundant - the destroy method above also deletes the corresponding row in the ProductsCategoriesModel table
+      // console.log("numberOfDeletedRows: ", numberOfDeletedRows);
+      // const numberOfDeletedRowsJunctionTable = await ProductsCategoriesModel.destroy({
+      //   where: { categoryId: req.params.categoryId },
+      // });
+      // console.log("numberOfDeletedRowsJunctionTable: ", numberOfDeletedRowsJunctionTable);
+
+      if (numberOfDeletedRows === 1) {
+        res.send(`The category with id: ${req.params.categoryId} successfully deleted from the 2 tables`);
+      } else {
+        next(NotFound(`The category with id: ${req.params.categoryId} not in the dbs`));
+      }
     } else {
-      next(NotFound(`The category with id: ${req.params.categoryId} not in the db`));
+      next(NotFound(`The product with id: ${id} not in the db`));
     }
   } catch (error) {
     next(error);

@@ -1,5 +1,6 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../db.js";
+import ReviewsModel from "../reviews/model.js";
 
 const ProductsModel = sequelize.define("product", {
   productId: {
@@ -29,5 +30,9 @@ const ProductsModel = sequelize.define("product", {
   },
   /* {timestamps: true} TIMESTAMPS HERE ARE TRUE BY DEFAULT */
 });
+
+/* ------------------ 1-to-many: PRODUCT & REVIEWS -------------------- */
+ProductsModel.hasMany(ReviewsModel, { foreignKey: { allowNull: false } });
+ReviewsModel.belongsTo(ProductsModel);
 
 export default ProductsModel;

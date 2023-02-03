@@ -3,6 +3,8 @@ import createHttpError from "http-errors";
 import { Op } from "sequelize";
 import ProductsModel from "./model.js";
 import ProductsCategoriesModel from "../JUNCTION/productsCategoriesModel.js";
+import CategoriesModel from "../categories/model.js";
+import ReviewsModel from "../reviews/model.js";
 
 const { NotFound } = createHttpError;
 
@@ -43,6 +45,7 @@ productsRouter.post("/", async (req, res, next) => {
   }
 });
 
+// GET - with categories & reviews
 productsRouter.get("/", async (req, res, next) => {
   try {
     const query = {};
@@ -61,7 +64,19 @@ productsRouter.get("/", async (req, res, next) => {
       });
       res.send(filteredProducts);
     } else {
-      const products = await ProductsModel.findAll();
+      const products = await ProductsModel.findAll({
+        include: [
+          {
+            model: CategoriesModel,
+            attributes: ["categoryId", "name"],
+            through: { attributes: ["productCategoryID"] },
+          },
+          {
+            model: ReviewsModel,
+            attributes: ["content", "rate"],
+          },
+        ],
+      });
       res.send(products);
     }
   } catch (error) {
@@ -87,7 +102,7 @@ productsRouter.get("/:productId", async (req, res, next) => {
 productsRouter.put("/:productId", async (req, res, next) => {
   try {
     const [numerOfUpdatedRows, updatedRecords] = await ProductsModel.update(req.body, {
-      where: { id: req.params.productId },
+      where: { productId: req.params.productId },
       attributes: { exclude: ["createdAt", "updatedAt"] },
       returning: true,
     });
@@ -105,7 +120,7 @@ productsRouter.put("/:productId", async (req, res, next) => {
 productsRouter.delete("/:productId", async (req, res, next) => {
   try {
     const numberOfDeletedRows = await ProductsModel.destroy({
-      where: { id: req.params.productId },
+      where: { productId: req.params.productId },
     });
     console.log("numberOfDeletedRows", numberOfDeletedRows);
     if (numberOfDeletedRows === 1) {

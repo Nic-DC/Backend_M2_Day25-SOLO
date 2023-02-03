@@ -2,34 +2,51 @@ import express from "express";
 import createHttpError from "http-errors";
 import { Op } from "sequelize";
 import ReviewsModel from "./model.js";
+import ProductsModel from "../products/model.js";
 
 const { NotFound } = createHttpError;
 
 export const reviewsRouter = express.Router();
 
-reviewsRouter.post("/", async (req, res, next) => {
+reviewsRouter.post("/:id/reviews", async (req, res, next) => {
   try {
-    const review = await ReviewsModel.create(req.body);
-    res.status(201).send(review);
+    const { id } = req.params;
+    const product = await ProductsModel.findByPk(id);
+    console.log("product with reviews", product);
+    if (product) {
+      const review = await ReviewsModel.create(req.body);
+      res.status(201).send(review);
+    } else {
+      next(NotFound(`The product with id: ${id} not in the db`));
+    }
   } catch (error) {
+    console.log("catch error: ", error);
     next(error);
   }
 });
 
-reviewsRouter.get("/", async (req, res, next) => {
+// GET - filtered reviews by rate
+reviewsRouter.get("/:id/reviews", async (req, res, next) => {
   try {
-    const query = {};
-    if (req.query.name || req.query.category) {
-      query.name = { [Op.iLike]: `%${req.query.name}%` };
-      query.category = { [Op.startsWith]: `${req.query.category}` };
-      const filteredReviews = await ReviewsModel.findAll({
-        where: { ...query },
-        attributes: ["name", "category", "price"],
-      });
-      res.send(filteredReviews);
+    const { id } = req.params;
+    const product = await ProductsModel.findByPk(id);
+    console.log("product with reviews", product);
+    if (product) {
+      const query = {};
+      if (req.query.rate) {
+        query.rate = { [Op.eq]: `${req.query.rate}` };
+
+        const filteredReviews = await ReviewsModel.findAll({
+          where: { ...query },
+          attributes: ["content"],
+        });
+        res.send(filteredReviews);
+      } else {
+        const reviews = await ReviewsModel.findAll();
+        res.send(reviews);
+      }
     } else {
-      const reviews = await ReviewsModel.findAll();
-      res.send(reviews);
+      next(NotFound(`The product with id: ${id} not in the db`));
     }
   } catch (error) {
     next(error);
