@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../db.js";
 import ReviewsModel from "../reviews/model.js";
+import UsersReviewsModel from "../JUNCTION/usersProductsModel.js";
 
 const UsersModel = sequelize.define("user", {
   userId: {

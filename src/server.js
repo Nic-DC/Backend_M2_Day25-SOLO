@@ -4,6 +4,7 @@ import listEndpoints from "express-list-endpoints";
 import { productsRouter } from "./api/products/index.js";
 import { reviewsRouter } from "./api/reviews/index.js";
 import { categoriesRouter } from "./api/categories/index.js";
+import { usersRouter } from "./api/users/index.js";
 import {
   badRequestErrorHandler,
   forbiddenErrorHandler,
@@ -22,6 +23,8 @@ server.use(cors());
 server.use(express.json());
 
 // ********************************** ENDPOINTS ****************************************
+server.use("/users", usersRouter);
+
 server.use("/products", productsRouter);
 server.use("/products", reviewsRouter);
 server.use("/products", categoriesRouter);

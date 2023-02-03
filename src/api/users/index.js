@@ -2,6 +2,7 @@ import express from "express";
 import createHttpError from "http-errors";
 import { Op } from "sequelize";
 import UsersModel from "./model.js";
+import usersProductsModel from "../JUNCTION/usersProductsModel.js";
 
 const { NotFound } = createHttpError;
 
